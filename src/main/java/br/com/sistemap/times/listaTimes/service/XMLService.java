@@ -8,7 +8,9 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -24,22 +26,24 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 public class XMLService {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
 
-    private final long SEGUNDO = 40;
+    //40 segundos.
+    private final long SEGUNDO = 40000;
 
     @Scheduled(fixedDelay = SEGUNDO)
-    public void parseXmlToJson() throws IOException, ParserConfigurationException, SAXException {
+    public void parseXmlToJson() throws IOException {
 
 
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://services.eoddsmaker.net/demo/feeds/V2.0/markets.ashx?l=1&u=sandro&p=sandro&frm=xml&sid=50";
         String response = restTemplate.getForObject(url,String.class);
-       // URLDecoder.decode(response, "utf-8");
+        URLDecoder.decode(response, "utf-8");
 
         XmlMapper xmlMapper = new XmlMapper();
         String responsJson = xmlMapper.readValue(response, String.class);
@@ -50,5 +54,6 @@ public class XMLService {
         log.info(json);
 
     }
+
 
 }

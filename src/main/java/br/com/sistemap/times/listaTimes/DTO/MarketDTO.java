@@ -18,8 +18,11 @@ public class MarketDTO {
     private List<SportsDTO> sportsDTO;
 
     public int getCnt() {
-        return cnt;
+        return this.cnt;
     }
+
+
+
 
 
 }
