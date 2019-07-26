@@ -1,32 +1,16 @@
 package br.com.sistemap.times.listaTimes.service;
 
 
+import br.com.sistemap.times.listaTimes.DTO.MarketDTO;
 import com.apple.eawt.Application;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.print.DocFlavor;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 
 public class XMLService {
 
@@ -37,22 +21,27 @@ public class XMLService {
     private final long SEGUNDO = 40000;
 
     @Scheduled(fixedDelay = SEGUNDO)
-    public void parseXmlToJson() throws IOException {
+    public void printMarketDTOFromApi() throws IOException {
+        MarketDTO marketDTO = this.parseMarketFromString(this.receiveResults());
+        log.info(marketDTO.toString());
+    }
 
+    private String receiveResults(){
+        try {
+            String xml = "http://services.eoddsmaker.net/demo/feeds/V2.0/markets.ashx?l=1&u=sandro&p=sandro&frm=xml&sid=50";
+            RestTemplate restTemplate = new RestTemplate();
+            return restTemplate.getForObject(xml,String.class);
 
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "http://services.eoddsmaker.net/demo/feeds/V2.0/markets.ashx?l=1&u=sandro&p=sandro&frm=xml&sid=50";
-        String response = restTemplate.getForObject(url,String.class);
-        URLDecoder.decode(response, "utf-8");
+        } catch (HttpClientErrorException ex) {
+            log.error(ex.getResponseBodyAsString());
+            throw  ex;
+        }
 
+    }
+
+    private MarketDTO parseMarketFromString(String xmlString) throws IOException {
         XmlMapper xmlMapper = new XmlMapper();
-        String responsJson = xmlMapper.readValue(response, String.class);
-
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(responsJson);
-
-        log.info(json);
-
+        return xmlMapper.readValue(xmlString, MarketDTO.class);
     }
 
 

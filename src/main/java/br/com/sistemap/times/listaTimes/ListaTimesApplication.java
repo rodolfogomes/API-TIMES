@@ -17,7 +17,7 @@ public class ListaTimesApplication {
 
         XMLService xmlService = new XMLService();
 		try {
-			xmlService.parseXmlToJson();
+			xmlService.printMarketDTOFromApi();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
