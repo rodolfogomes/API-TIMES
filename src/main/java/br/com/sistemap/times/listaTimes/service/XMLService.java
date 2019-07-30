@@ -6,6 +6,7 @@ import com.apple.eawt.Application;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -23,13 +24,19 @@ public class XMLService {
     @Scheduled(fixedDelay = SEGUNDO)
     public void printMarketDTOFromApi() throws IOException {
         MarketDTO marketDTO = this.parseMarketFromString(this.receiveResults());
-        log.info(marketDTO.toString());
+        marketDTO.getSportsDTO().forEach(sport ->{
+            log.info(sport.getCountryDTO().getLeagueDTO().getEventDTO().getT1()
+            +" X "+ sport.getCountryDTO().getLeagueDTO().getEventDTO().getT2());
+
+        });
+        //log.info(marketDTO.toString());
     }
 
     private String receiveResults(){
         try {
             String xml = "http://services.eoddsmaker.net/demo/feeds/V2.0/markets.ashx?l=1&u=sandro&p=sandro&frm=xml&sid=50";
             RestTemplate restTemplate = new RestTemplate();
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
             return restTemplate.getForObject(xml,String.class);
 
         } catch (HttpClientErrorException ex) {
